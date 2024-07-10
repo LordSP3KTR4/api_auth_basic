@@ -11,6 +11,45 @@ router.post('/create', async (req, res) => {
     res.status(response.code).json(response.message);
 });
 
+//Ejercicio 1
+router.get(
+    '/getAllUsers',
+    [
+
+        AuthMiddleware.validateToken,
+        UserMiddleware.hasPermissions
+    ],
+    async (req, res) => {
+        const response = await UserService.getAllUsers(req);
+        res.status(response.code).json(response.message);
+    });
+
+//Ejercicio 2
+router.get(
+    '/findUsers',
+    [
+
+        AuthMiddleware.validateToken,
+        UserMiddleware.hasPermissions
+    ],
+    async (req, res) => {
+        const response = await UserService.findUsers(req.query);
+        res.status(response.code).json(response.message);
+    });
+
+//Ejercicio 3
+router.post(
+    '/bulkCreate',
+    [
+
+        AuthMiddleware.validateToken,
+        UserMiddleware.hasPermissions
+    ],
+    async (req, res) => {
+        const response = await UserService.findUsers(req.query);
+        res.status(response.code).json(response.message);
+    });
+    
 router.get(
     '/:id',
     [
