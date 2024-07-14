@@ -118,17 +118,11 @@ const getAllUsers = async () => {
 const findUsers = async (QueryParams) => {
     
     const { status, name, loginDateBefore, loginDateAfter } = QueryParams;
+    let where = {};
 
-    if (status == 'false') {
-        const where = {status: false};
-        return {
-            code: 200,
-            message: await db.User.findAll({
-                where,
-            }),
-        };}
-    
-    const where = {status: true};
+    if (status !== undefined) {
+        where.status = status === 'true';
+    }
     if (name) {
         where.name = {
             [Op.like]: `%${name}%`,
