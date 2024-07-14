@@ -40,16 +40,12 @@ router.get(
 //Ejercicio 3
 router.post(
     '/bulkCreate',
-    [
-
-        AuthMiddleware.validateToken,
-        UserMiddleware.hasPermissions
-    ],
-    async (req, res) => {
-        const response = await UserService.findUsers(req.query);
-        res.status(response.code).json(response.message);
-    });
+    AuthMiddleware.validateToken,
+    UserMiddleware.hasPermissions,
+    UserService.bulkCreate    
+);
     
+
 router.get(
     '/:id',
     [

@@ -174,12 +174,66 @@ const findUsers = async (QueryParams) => {
 };
 
 //Ejercicio 3
+const validateUser = (user) => {
+    return user.name && user.email && user.password && user.password === user.password_second;
+};
 
+const bulkCreate = async (req, res) => {
+    const usersToCreate = req.body;
+
+    if (!Array.isArray(usersToCreate)) {
+        return({
+            code: 400,
+            message: 'Invalid request format: Expected an array of users.'
+        });
+    }
+
+    let createdUserCount = 0;
+    let failedUserCount = 0;
+    const failedUsers = [];
+
+    for (const user of usersToCreate) {
+        const existingUser = await db.User.findOne({ where: { email: user.email } });
+
+        if (existingUser) {
+            failedUserCount++;
+            failedUsers.push({ email: user.email, reason: 'Usuario ya existente' });
+            continue;
+        }
+
+        if (validateUser(user)) {
+            try {
+                const encryptedPassword = await bcrypt.hash(user.password, 10);
+                await db.User.create({
+                    name: user.name,
+                    email: user.email,
+                    password: encryptedPassword,
+                    cellphone: user.cellphone,
+                    status: true
+                });
+                createdUserCount++;
+            } catch (error) {
+                failedUserCount++;
+                failedUsers.push({ email: user.email, reason: 'Database error' });
+            }
+        } else {
+            failedUserCount++;
+            failedUsers.push({ email: user.email, reason: 'Validacion fallida' });
+        }
+    }
+
+    return res.status(200).json({
+        code: 200,
+        message: `${createdUserCount} Registrados correctamente, ${failedUserCount} No registrados.`,
+        details: { created: createdUserCount, failed: failedUserCount, failedUsers }
+    });
+};
 export default {
     createUser,
     getUserById,
     updateUser,
     deleteUser,
     getAllUsers,
-    findUsers
+    findUsers,
+    bulkCreate
 }
